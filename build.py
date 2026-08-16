@@ -2,7 +2,7 @@
 """Builds misket.app in Turkish and English.
 
 Output layout (language-neutral paths are redirected by nginx to the
-visitor's language, so App Store links like /sessiz/privacy keep working):
+visitor's language, so App Store links like /etut/privacy keep working):
 
     /tr/…  Turkish pages
     /en/…  English pages
@@ -92,25 +92,25 @@ UI = {
 
 # slug, name, emoji, gradient, status, {lang: (tagline, longdesc, [features], privacy)}
 APPS = [
- ("sessiz", "Sessiz", "🔇", "#f25c8a,#8a1e4f", "soon", {
+ ("etut", "Etüt", "🎯", "#f25c8a,#8a1e4f", "soon", {
    "tr": ("YKS çalışma takibi — planla, kronometreyi başlat, telefon sussun.",
-     "Sessiz; YKS'ye hazırlanırken plan yapmanı, çalıştığın süreyi ve konuları takip etmeni ve en önemlisi telefonun seni bölmemesini sağlar.",
+     "Etüt; YKS'ye hazırlanırken plan yapmanı, çalıştığın süreyi ve konuları takip etmeni ve en önemlisi telefonun seni bölmemesini sağlar.",
      ["Telefon çiti: kronometre çalışırken seçtiğin uygulamalar kapanır",
       "Flip modu: telefonu ters çevir, kronometre çalışsın; kaldırınca mola",
       "TYT/AYT müfredatı gömülü konu takibi (ders → ünite → konu)",
       "Haftalık ve aylık plan, tarih bazlı tek seferlik planlar",
       "Deneme netleri, puan ve sıralama tahmini",
       "Günün karnesi: paylaşılabilir kart + veli/koç için PDF"],
-     "Sessiz, Apple'ın Ekran Süresi (Family Controls) altyapısını kullanır ve hangi uygulamaları engellediğini <strong>göremez</strong> — bu bilgi iOS'ta kalır. Planların, çalışma kayıtların ve deneme sonuçların yalnızca cihazında saklanır."),
+     "Etüt, Apple'ın Ekran Süresi (Family Controls) altyapısını kullanır ve hangi uygulamaları engellediğini <strong>göremez</strong> — bu bilgi iOS'ta kalır. Planların, çalışma kayıtların ve deneme sonuçların yalnızca cihazında saklanır."),
    "en": ("Study tracking for exam prep — plan, start the timer, let the phone go quiet.",
-     "Sessiz helps you plan your study, track the time and topics you cover and — most importantly — keeps your phone from interrupting you.",
+     "Etüt helps you plan your study, track the time and topics you cover and — most importantly — keeps your phone from interrupting you.",
      ["Phone fence: chosen apps are blocked while the timer runs",
       "Flip mode: turn the phone face-down to run the timer, pick it up for a break",
       "Built-in curriculum tracking (subject → unit → topic)",
       "Weekly and monthly plans, plus one-off dated plans",
       "Mock-exam results with score and rank estimates",
       "Daily report card: a shareable card and a PDF for parents or coaches"],
-     "Sessiz uses Apple's Screen Time (Family Controls) framework and <strong>cannot see</strong> which apps you block — that stays inside iOS. Your plans, study records and exam results are stored only on your device."),
+     "Etüt uses Apple's Screen Time (Family Controls) framework and <strong>cannot see</strong> which apps you block — that stays inside iOS. Your plans, study records and exam results are stored only on your device."),
  }),
  ("fence", "Fence", "🚧", "#2e7cd6,#14335f", "soon", {
    "tr": ("Dikkat dağıtan uygulamaları engelle. Bir kez öde.",
@@ -227,7 +227,7 @@ FAQ = {
         ("Verilerim yedekleniyor mu?",
          "Uygulamalar cihaz üstünde çalıştığı için verilerin iPhone yedeğine (iCloud Backup ya da bilgisayar yedeği) dahil olur. Telefon değiştirirken yedekten geri yükleme yaparsan verilerin gelir."),
         ("Uygulama engelleme neden izin istiyor?",
-         "Sessiz ve Fence, Apple'ın Ekran Süresi altyapısını kullanır. Bu izin olmadan iOS hiçbir uygulamanın engellenmesine izin vermez. İzni istediğin an Ayarlar → Ekran Süresi'nden geri alabilirsin."),
+         "Etüt ve Fence, Apple'ın Ekran Süresi altyapısını kullanır. Bu izin olmadan iOS hiçbir uygulamanın engellenmesine izin vermez. İzni istediğin an Ayarlar → Ekran Süresi'nden geri alabilirsin."),
         ("Hata buldum ya da özellik önerim var",
          "Yaz gitsin — küçük stüdyo olmanın iyi tarafı, önerilerin gerçekten sıradaki güncellemeye girebilmesi."),
     ],
@@ -237,7 +237,7 @@ FAQ = {
         ("Are my data backed up?",
          "Because the apps run on device, your data is included in your iPhone backup (iCloud Backup or a computer backup). Restoring a backup on a new phone brings everything along."),
         ("Why does app blocking ask for permission?",
-         "Sessiz and Fence use Apple's Screen Time framework. Without that permission iOS won't let any app block another. You can revoke it any time in Settings → Screen Time."),
+         "Etüt and Fence use Apple's Screen Time framework. Without that permission iOS won't let any app block another. You can revoke it any time in Settings → Screen Time."),
         ("I found a bug or have a feature idea",
          "Send it over — the upside of a one-person studio is that suggestions can genuinely land in the next update."),
     ],
@@ -269,7 +269,7 @@ def footer(lang):
 
 
 def page(lang, path_in_lang, title, description, body):
-    """path_in_lang: '' for the language home, 'sessiz/' etc. otherwise."""
+    """path_in_lang: '' for the language home, 'etut/' etc. otherwise."""
     canonical = f"/{lang}/{path_in_lang}"
     alt = "".join(
         f'<link rel="alternate" hreflang="{l}" href="https://misket.app/{l}/{path_in_lang}">\n'
