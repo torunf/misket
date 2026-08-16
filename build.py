@@ -1,0 +1,457 @@
+#!/usr/bin/env python3
+"""Builds misket.app in Turkish and English.
+
+Output layout (language-neutral paths are redirected by nginx to the
+visitor's language, so App Store links like /sessiz/privacy keep working):
+
+    /tr/…  Turkish pages
+    /en/…  English pages
+    /style.css
+
+Run: python3 build.py
+"""
+import os, shutil
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+OUT = ROOT
+
+LANGS = ("tr", "en")
+
+# ---------------------------------------------------------------- content
+
+UI = {
+    "tr": {
+        "apps": "Uygulamalar", "support": "Destek", "privacy": "Gizlilik",
+        "home_title": "Misket — Küçük ama iyi yapılmış uygulamalar",
+        "home_h1": "Küçük ama iyi yapılmış uygulamalar.",
+        "home_tagline": "Misket; tek bir işi düzgün yapan, cihazında çalışan, seni takip etmeyen iPhone uygulamalarının çatısıdır. Hesap yok, sunucu yok, abonelik dayatması yok.",
+        "principles": "Ortak ilkeler",
+        "p1": "<strong>Cihazında kalır.</strong> Verilerin iPhone'undan çıkmaz; hesap ya da bulut gerekmez.",
+        "p2": "<strong>Takip yok.</strong> Analitik, reklam kimliği ve üçüncü taraf izleyici kullanmıyoruz.",
+        "p3": "<strong>Dürüst fiyat.</strong> Çoğu uygulama ücretsiz ya da tek seferlik ödemeli; sessizce ücretliye dönen deneme yok.",
+        "contact": "İletişim",
+        "contact_line": "Soru, öneri ya da hata bildirimi:",
+        "badge_live": "App Store'da", "badge_soon": "Çok yakında",
+        "features": "Özellikler",
+        "privacy_short": "Gizlilik",
+        "privacy_link": "gizlilik politikası →",
+        "support_h": "Destek",
+        "support_line": "Sorunun mu var? Şu adrese yaz — genelde aynı gün dönüyorum:",
+        "footer_1": "Misket, Furkan Torun tarafından yapılan uygulamaların çatısıdır. Hepsi cihaz üstünde çalışır; hesap, sunucu ve veri toplama yoktur.",
+        "updated": "Son güncelleme: 16 Ağustos 2026",
+        "privacy_short_version": "Kısa versiyon: {app} hiçbir veri toplamaz.",
+        "where_data": "Verileriniz nerede durur?",
+        "not_collected": "Toplamadıklarımız",
+        "nc1": "Hesap, e-posta ya da telefon numarası istemiyoruz.",
+        "nc2": "Analitik, çökme raporu ya da reklam kimliği toplamıyoruz.",
+        "nc3": "Üçüncü taraf izleyici (SDK) kullanmıyoruz.",
+        "nc4": "Sunucumuz yok; verileriniz gidecek bir yer yok.",
+        "purchases": "Satın almalar",
+        "purchases_body": 'Uygulama içi satın alma varsa Apple tarafından App Store üzerinden işlenir; ödeme bilgilerinizi görmeyiz. Ayrıntı için <a href="https://www.apple.com/legal/privacy/">Apple Gizlilik Politikası</a>.',
+        "children": "Çocuklar",
+        "children_body": "Hiç kimseden veri toplamadığımız için çocuklardan da veri toplamıyoruz.",
+        "changes": "Değişiklikler",
+        "changes_body": "Bu politika değişirse yeni sürüm bu sayfada, güncel tarihle yayımlanır.",
+        "lang_other": "English",
+    },
+    "en": {
+        "apps": "Apps", "support": "Support", "privacy": "Privacy",
+        "home_title": "Misket — Small apps, made well",
+        "home_h1": "Small apps, made well.",
+        "home_tagline": "Misket is the home of iPhone apps that do one thing properly, run on your device and never track you. No accounts, no servers, no subscription traps.",
+        "principles": "What they share",
+        "p1": "<strong>Stays on your device.</strong> Your data never leaves your iPhone — no account, no cloud.",
+        "p2": "<strong>No tracking.</strong> No analytics, no advertising identifiers, no third-party trackers.",
+        "p3": "<strong>Honest pricing.</strong> Most apps are free or a single one-time purchase; no trial that quietly converts.",
+        "contact": "Contact",
+        "contact_line": "Questions, ideas or bug reports:",
+        "badge_live": "On the App Store", "badge_soon": "Coming soon",
+        "features": "Features",
+        "privacy_short": "Privacy",
+        "privacy_link": "privacy policy →",
+        "support_h": "Support",
+        "support_line": "Something wrong? Write to — usually answered the same day:",
+        "footer_1": "Misket is the home of apps made by Furkan Torun. They all run on device: no accounts, no servers, no data collection.",
+        "updated": "Last updated: 16 August 2026",
+        "privacy_short_version": "The short version: {app} collects no data.",
+        "where_data": "Where your data lives",
+        "not_collected": "What we don't collect",
+        "nc1": "No account, email address or phone number.",
+        "nc2": "No analytics, crash reporting or advertising identifiers.",
+        "nc3": "No third-party tracking SDKs.",
+        "nc4": "We have no server; there is nowhere for your data to go.",
+        "purchases": "Purchases",
+        "purchases_body": 'Any in-app purchase is handled by Apple through the App Store; we never see your payment details. See <a href="https://www.apple.com/legal/privacy/">Apple\'s Privacy Policy</a>.',
+        "children": "Children",
+        "children_body": "We collect no information from anyone, children included, because we collect none at all.",
+        "changes": "Changes",
+        "changes_body": "If this policy changes, the new version appears on this page with an updated date.",
+        "lang_other": "Türkçe",
+    },
+}
+
+# slug, name, emoji, gradient, status, {lang: (tagline, longdesc, [features], privacy)}
+APPS = [
+ ("sessiz", "Sessiz", "🔇", "#f25c8a,#8a1e4f", "soon", {
+   "tr": ("YKS çalışma takibi — planla, kronometreyi başlat, telefon sussun.",
+     "Sessiz; YKS'ye hazırlanırken plan yapmanı, çalıştığın süreyi ve konuları takip etmeni ve en önemlisi telefonun seni bölmemesini sağlar.",
+     ["Telefon çiti: kronometre çalışırken seçtiğin uygulamalar kapanır",
+      "Flip modu: telefonu ters çevir, kronometre çalışsın; kaldırınca mola",
+      "TYT/AYT müfredatı gömülü konu takibi (ders → ünite → konu)",
+      "Haftalık ve aylık plan, tarih bazlı tek seferlik planlar",
+      "Deneme netleri, puan ve sıralama tahmini",
+      "Günün karnesi: paylaşılabilir kart + veli/koç için PDF"],
+     "Sessiz, Apple'ın Ekran Süresi (Family Controls) altyapısını kullanır ve hangi uygulamaları engellediğini <strong>göremez</strong> — bu bilgi iOS'ta kalır. Planların, çalışma kayıtların ve deneme sonuçların yalnızca cihazında saklanır."),
+   "en": ("Study tracking for exam prep — plan, start the timer, let the phone go quiet.",
+     "Sessiz helps you plan your study, track the time and topics you cover and — most importantly — keeps your phone from interrupting you.",
+     ["Phone fence: chosen apps are blocked while the timer runs",
+      "Flip mode: turn the phone face-down to run the timer, pick it up for a break",
+      "Built-in curriculum tracking (subject → unit → topic)",
+      "Weekly and monthly plans, plus one-off dated plans",
+      "Mock-exam results with score and rank estimates",
+      "Daily report card: a shareable card and a PDF for parents or coaches"],
+     "Sessiz uses Apple's Screen Time (Family Controls) framework and <strong>cannot see</strong> which apps you block — that stays inside iOS. Your plans, study records and exam results are stored only on your device."),
+ }),
+ ("fence", "Fence", "🚧", "#2e7cd6,#14335f", "soon", {
+   "tr": ("Dikkat dağıtan uygulamaları engelle. Bir kez öde.",
+     "Fence, seçtiğin uygulamaları programa göre ya da odak seansları boyunca engeller — tek seferlik küçük bir ücretle, sonsuza dek.",
+     ["Çitler: uygulama ve kategori seçimi, program ya da odak seansı",
+      "Katılık seviyeleri: Nazik, Sıkı (günde üç izin), Kilitli",
+      "Günlük süre bütçesi: 30 dakika sonra çit kendiliğinden çekilir",
+      "Kilitli modda uygulama silme devre dışı",
+      "Acil çıkış: günde bir kez, 60 saniye bekleme ve gerekçeyle",
+      "Dürüst istatistik: kaç kez çite takıldın, kaç kez geri döndün"],
+     "Fence, Apple'ın Ekran Süresi altyapısını kullanır ve hangi uygulamaları engellediğini göremez. Sayaçlar yalnızca cihazında tutulur."),
+   "en": ("Block distracting apps. Pay once.",
+     "Fence blocks the apps you choose — on a schedule or during focus sessions — for one small one-time price, forever.",
+     ["Fences: pick apps and categories, on a schedule or for focus sessions",
+      "Strictness levels: Gentle, Strict (three passes a day), Locked",
+      "Daily time budget: after 30 minutes the fence rises by itself",
+      "App deletion disabled during Locked sessions",
+      "Emergency unlock: once a day, after a 60-second wait and a written reason",
+      "Honest stats: how often you hit the fence and how often you turned back"],
+     "Fence uses Apple's Screen Time framework and cannot see which apps you block. Counters stay on your device."),
+ }),
+ ("sanita", "Sanita", "🫶", "#2e7cd6,#173f8a", "soon", {
+   "tr": ("Ağrı günlüğü — doktora götürebileceğin PDF raporlarıyla.",
+     "Kronik ağrıyı hafızadan anlatmak zordur. Sanita bunu kayda dönüştürür: üç dokunuşta ağrı girişi, örüntülerin ve doktorunun gerçekten kullanabileceği bir rapor.",
+     ["Vücut haritasında üç dokunuşla ağrı kaydı",
+      "Tetikleyici analizi: bir tetikleyiciyle ve onsuz ortalama şiddet",
+      "İlaç etkisi: aldıktan sonra şiddet nasıl değişti",
+      "Apple Health'ten uyku ve aktivite korelasyonu (opsiyonel, salt okunur)",
+      "Hava basıncı korelasyonu (opsiyonel)",
+      "Doktora hazır PDF rapor"],
+     "Sağlık verilerin iPhone'undan hiç çıkmaz. Hesap, bulut ve analitik yoktur; Apple Health verisi yalnızca cihazda işlenir ve saklanmaz."),
+   "en": ("A pain diary — with PDF reports you can hand to your doctor.",
+     "Chronic pain is hard to describe from memory. Sanita turns it into a record: log pain in three taps, see your patterns and bring your doctor a report they can actually use.",
+     ["Log pain in three taps on a body map",
+      "Trigger analysis: average intensity with a trigger versus without it",
+      "Medication effect: how intensity changed after you took something",
+      "Sleep and activity correlation from Apple Health (optional, read-only)",
+      "Barometric pressure correlation (optional)",
+      "Doctor-ready PDF report"],
+     "Your health data never leaves your iPhone. No account, no cloud, no analytics; Apple Health data is processed on device and never stored."),
+ }),
+ ("squish", "Squish", "🗜️", "#ff8f6b,#ff4a2c", "live", {
+   "tr": ("HEIC'ten JPG'ye: dönüştür, boyutlandır, sıkıştır.",
+     "iPhone fotoğraflarını herkesin açabileceği formata çeviren, boyutlandıran ve sıkıştıran basit araç. Hiçbir şey buluta yüklenmez.",
+     ["HEIC → JPG/PNG dönüştürme", "Toplu işlem ve ZIP içe aktarma",
+      "Boyutlandırma ve kalite ayarı", "Paylaşım sayfası eklentisi ve Kısayollar desteği",
+      "12 dil desteği"],
+     "Fotoğraflarınız cihazınızda işlenir; uygulama hiçbir ağ isteği yapmaz."),
+   "en": ("HEIC to JPG: convert, resize, compress.",
+     "A simple tool that converts iPhone photos into formats everyone can open, resizes and compresses them. Nothing is ever uploaded.",
+     ["HEIC → JPG/PNG conversion", "Batch processing and ZIP import",
+      "Resizing and quality control", "Share extension and Shortcuts support",
+      "Available in 12 languages"],
+     "Your photos are processed on device; the app makes no network requests."),
+ }),
+ ("matte", "Matte", "✂️", "#7c5cff,#2c1e6b", "soon", {
+   "tr": ("Arka planı sil, şeffaf PNG ve çıkartma üret.",
+     "Fotoğraftaki nesneyi arka planından ayıran, şeffaf PNG veya mesajlaşma çıkartması üreten, tamamen cihaz üstü çalışan araç.",
+     ["Tek dokunuşla arka plan kaldırma (iOS 17 yerel API)",
+      "Şeffaf PNG dışa aktarma", "Mesajlaşma çıkartması üretme", "Toplu işlem"],
+     "Görüntüler cihazınızda işlenir; hiçbir şey yüklenmez."),
+   "en": ("Remove the background, export transparent PNGs and stickers.",
+     "Lifts the subject out of a photo and exports it as a transparent PNG or a messaging sticker — entirely on device.",
+     ["One-tap background removal (native iOS 17 API)",
+      "Transparent PNG export", "Messaging sticker creation", "Batch processing"],
+     "Images are processed on your device; nothing is uploaded."),
+ }),
+ ("pare", "Pare", "🧹", "#1f9e6b,#0d6b4d", "soon", {
+   "tr": ("Mükerrer fotoğrafları ve yer kaplayan videoları güvenle temizle.",
+     "Benzer fotoğrafları, ekran görüntülerini ve büyük videoları bulup güvenle silmeni sağlayan temizlik aracı. Onayın olmadan hiçbir şey silinmez.",
+     ["Benzer fotoğraf ve ekran görüntüsü tespiti",
+      "Büyük videoları boyuta göre listeleme",
+      "Silmeden önce her zaman onay", "Tamamen cihaz üstü tarama"],
+     "Fotoğraf kitaplığınız yalnızca cihazınızda taranır; hiçbir görüntü yüklenmez ve onayınız olmadan silinmez."),
+   "en": ("Clear out duplicate photos and space-hogging videos, safely.",
+     "Finds similar photos, screenshots and large videos so you can delete them with confidence. Nothing is removed without your approval.",
+     ["Similar-photo and screenshot detection",
+      "Large videos listed by size",
+      "Always asks before deleting", "Scanning happens entirely on device"],
+     "Your photo library is scanned on device only; no image is uploaded and nothing is deleted without your confirmation."),
+ }),
+ ("archivo", "Archivo", "📄", "#4a6cf7,#1b2a6b", "soon", {
+   "tr": ("Belge tara, PDF üret, aranabilir arşivde sakla.",
+     "Belgeleri kameradan tarayan, fotoğraf ve metinlerden sıfırdan PDF üreten ve hepsini aranabilir tek bir arşivde tutan uygulama.",
+     ["Kameradan belge tarama", "Fotoğraf ve metinden PDF üretme",
+      "Aranabilir arşiv", "Tamamen cihaz üstü"],
+     "Belgeleriniz cihazınızda kalır; bulut yükleme yoktur."),
+   "en": ("Scan documents, build PDFs, keep them in a searchable archive.",
+     "Scans documents with the camera, builds PDFs from photos and text, and keeps everything in one searchable archive.",
+     ["Camera document scanning", "PDFs from photos and text",
+      "Searchable archive", "Entirely on device"],
+     "Your documents stay on your device; there is no cloud upload."),
+ }),
+ ("opsix", "OpSix", "🎯", "#f5a524,#8a5a00", "soon", {
+   "tr": ("Günlük sayı bulmacası — 6 sayı, dört işlem, tek hedef.",
+     "Bir Kelime Bir İşlem'in sayı turu: altı sayıyı dört işlemle hedefe ulaştır. Her gün herkese aynı bulmacalar.",
+     ["Her gün 15 bulmaca (kolay/orta/zor)", "Game Center sıralaması",
+      "Paylaşılabilir sonuç kartı", "Tamamen sunucusuz, çevrimdışı çalışır",
+      "12 dil desteği"],
+     "Oyun verileriniz cihazınızda tutulur. Sıralama için yalnızca Game Center kullanılır."),
+   "en": ("A daily number puzzle — six numbers, four operations, one target.",
+     "Reach the target using six numbers and the four basic operations. Everyone gets the same puzzles each day.",
+     ["15 puzzles every day (easy/medium/hard)", "Game Center leaderboards",
+      "Shareable result card", "Fully serverless, works offline",
+      "Available in 12 languages"],
+     "Your game data stays on device. Game Center is the only service used, and only for rankings."),
+ }),
+]
+
+FAQ = {
+    "tr": [
+        ("Satın aldığım özelliği kaybettim, ne yapmalıyım?",
+         "Uygulamanın Ayarlar bölümünde \"Satın alımı geri yükle\" düğmesi var. Aynı Apple hesabıyla giriş yaptığından emin ol; tek seferlik satın almalar kalıcıdır."),
+        ("Verilerim yedekleniyor mu?",
+         "Uygulamalar cihaz üstünde çalıştığı için verilerin iPhone yedeğine (iCloud Backup ya da bilgisayar yedeği) dahil olur. Telefon değiştirirken yedekten geri yükleme yaparsan verilerin gelir."),
+        ("Uygulama engelleme neden izin istiyor?",
+         "Sessiz ve Fence, Apple'ın Ekran Süresi altyapısını kullanır. Bu izin olmadan iOS hiçbir uygulamanın engellenmesine izin vermez. İzni istediğin an Ayarlar → Ekran Süresi'nden geri alabilirsin."),
+        ("Hata buldum ya da özellik önerim var",
+         "Yaz gitsin — küçük stüdyo olmanın iyi tarafı, önerilerin gerçekten sıradaki güncellemeye girebilmesi."),
+    ],
+    "en": [
+        ("I lost a feature I paid for — what now?",
+         "Every app has a \"Restore purchase\" button in Settings. Make sure you're signed in with the same Apple Account; one-time purchases are permanent."),
+        ("Are my data backed up?",
+         "Because the apps run on device, your data is included in your iPhone backup (iCloud Backup or a computer backup). Restoring a backup on a new phone brings everything along."),
+        ("Why does app blocking ask for permission?",
+         "Sessiz and Fence use Apple's Screen Time framework. Without that permission iOS won't let any app block another. You can revoke it any time in Settings → Screen Time."),
+        ("I found a bug or have a feature idea",
+         "Send it over — the upside of a one-person studio is that suggestions can genuinely land in the next update."),
+    ],
+}
+
+# ---------------------------------------------------------------- rendering
+
+def nav(lang, path_in_lang):
+    t = UI[lang]
+    other = "en" if lang == "tr" else "tr"
+    return f'''<div class="nav">
+  <a class="brand" href="/{lang}/"><span class="dot"></span> Misket</a>
+  <span class="spacer"></span>
+  <span class="links">
+    <a href="/{lang}/#apps">{t["apps"]}</a>
+    <a href="/{lang}/support/">{t["support"]}</a>
+    <a href="/{lang}/privacy/">{t["privacy"]}</a>
+    <a href="/{other}/{path_in_lang}">{t["lang_other"]}</a>
+  </span>
+</div>'''
+
+
+def footer(lang):
+    t = UI[lang]
+    return f'''<footer>
+  <p>{t["footer_1"]}</p>
+  <p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a> · <a href="/{lang}/privacy/">{t["privacy"]}</a> · <a href="/{lang}/support/">{t["support"]}</a> · © 2026 Furkan Torun</p>
+</footer>'''
+
+
+def page(lang, path_in_lang, title, description, body):
+    """path_in_lang: '' for the language home, 'sessiz/' etc. otherwise."""
+    canonical = f"/{lang}/{path_in_lang}"
+    alt = "".join(
+        f'<link rel="alternate" hreflang="{l}" href="https://misket.app/{l}/{path_in_lang}">\n'
+        for l in LANGS
+    )
+    html = f'''<!doctype html>
+<html lang="{lang}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{title}</title>
+<meta name="description" content="{description}">
+<link rel="canonical" href="https://misket.app{canonical}">
+{alt}<link rel="alternate" hreflang="x-default" href="https://misket.app/en/{path_in_lang}">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="wrap">
+{nav(lang, path_in_lang)}
+{body}
+{footer(lang)}
+</div>
+</body>
+</html>
+'''
+    full = os.path.join(OUT, lang, path_in_lang, "index.html")
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    open(full, "w", encoding="utf-8").write(html)
+
+
+def build_lang(lang):
+    t = UI[lang]
+
+    # Home
+    cards = []
+    for slug, name, emoji, grad, status, texts in APPS:
+        g1, g2 = grad.split(",")
+        tagline = texts[lang][0]
+        badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
+        cards.append(f'''  <a class="app" href="/{lang}/{slug}/">
+    <div class="icon" style="background:linear-gradient(135deg,{g1},{g2})">{emoji}</div>
+    <div class="name">{name}</div>
+    <div class="desc">{tagline}</div>
+    <span class="badge {badge_class}">{badge_text}</span>
+  </a>''')
+
+    home_body = f'''<header class="hero">
+  <h1>{t["home_h1"]}</h1>
+  <p class="tagline">{t["home_tagline"]}</p>
+</header>
+
+<h2 id="apps">{t["apps"]}</h2>
+<div class="grid">
+{chr(10).join(cards)}
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">{t["principles"]}</h3>
+  <ul><li>{t["p1"]}</li><li>{t["p2"]}</li><li>{t["p3"]}</li></ul>
+</div>
+
+<h2>{t["contact"]}</h2>
+<p class="small">{t["contact_line"]} <a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>'''
+    page(lang, "", t["home_title"], t["home_tagline"], home_body)
+
+    # App pages + privacy
+    for slug, name, emoji, grad, status, texts in APPS:
+        g1, g2 = grad.split(",")
+        tagline, longdesc, features, privacy = texts[lang]
+        badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
+        feats = "\n".join(f"  <li>{f}</li>" for f in features)
+        body = f'''<header class="hero">
+  <div class="icon" style="width:76px;height:76px;border-radius:18px;font-size:38px;display:grid;place-items:center;background:linear-gradient(135deg,{g1},{g2});margin-bottom:18px">{emoji}</div>
+  <h1>{name}</h1>
+  <p class="tagline">{tagline}</p>
+  <p><span class="badge {badge_class}">{badge_text}</span></p>
+</header>
+
+<p>{longdesc}</p>
+
+<h2>{t["features"]}</h2>
+<ul>
+{feats}
+</ul>
+
+<div class="card">
+  <h3 style="margin-top:0">{t["privacy_short"]}</h3>
+  <p class="small">{privacy}</p>
+  <p class="small"><a href="/{lang}/{slug}/privacy/">{name} {t["privacy_link"]}</a></p>
+</div>
+
+<h2>{t["support_h"]}</h2>
+<p class="small">{t["support_line"]} <a href="mailto:merhaba@misket.app?subject={name}">merhaba@misket.app</a></p>'''
+        page(lang, f"{slug}/", f"{name} — Misket", tagline, body)
+
+        priv_body = f'''<header class="hero">
+  <h1>{name} — {t["privacy"]}</h1>
+  <p class="small">{t["updated"]}</p>
+</header>
+
+<p><strong>{t["privacy_short_version"].format(app=name)}</strong></p>
+
+<h2>{t["where_data"]}</h2>
+<p>{privacy}</p>
+
+<h2>{t["not_collected"]}</h2>
+<ul><li>{t["nc1"]}</li><li>{t["nc2"]}</li><li>{t["nc3"]}</li><li>{t["nc4"]}</li></ul>
+
+<h2>{t["purchases"]}</h2>
+<p>{t["purchases_body"]}</p>
+
+<h2>{t["children"]}</h2>
+<p>{t["children_body"]}</p>
+
+<h2>{t["changes"]}</h2>
+<p>{t["changes_body"]}</p>
+
+<h2>{t["contact"]}</h2>
+<p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>'''
+        page(lang, f"{slug}/privacy/", f"{name} — {t['privacy']} — Misket",
+             t["privacy_short_version"].format(app=name), priv_body)
+
+    # Shared privacy hub
+    links = "\n".join(
+        f'    <li><a href="/{lang}/{slug}/privacy/">{name}</a></li>'
+        for slug, name, *_ in APPS
+    )
+    hub_intro = ("Misket çatısı altındaki uygulamaların tamamı cihaz üstünde çalışır. Hiçbirinde hesap sistemi, sunucu ya da analitik yoktur. Uygulamaların topladığı veri miktarı sıfırdır."
+                 if lang == "tr" else
+                 "Every app under the Misket umbrella runs on device. None of them has an account system, a server or analytics. The amount of data they collect is zero.")
+    apple_h = "Apple servisleri" if lang == "tr" else "Apple services"
+    apple_b = ("Bazı uygulamalar Apple'ın kendi servislerini kullanır: satın almalar için StoreKit, sıralamalar için Game Center, hava verisi için WeatherKit, uygulama engelleme için Ekran Süresi. Bu servislerin işlediği veriler Apple'ın gizlilik politikasına tabidir ve bize aktarılmaz."
+               if lang == "tr" else
+               "Some apps use Apple's own services: StoreKit for purchases, Game Center for leaderboards, WeatherKit for weather data and Screen Time for app blocking. Data handled by those services falls under Apple's privacy policy and is never passed to us.")
+    policies_h = "Uygulama gizlilik politikaları" if lang == "tr" else "Per-app privacy policies"
+    page(lang, "privacy/", f"{t['privacy']} — Misket", hub_intro, f'''<header class="hero">
+  <h1>{t["privacy"]}</h1>
+  <p class="tagline">{"Hepsi aynı ilkeyle yazıldı: verin sende kalır." if lang == "tr" else "All built on one principle: your data stays yours."}</p>
+</header>
+
+<p>{hub_intro}</p>
+
+<div class="card">
+  <h3 style="margin-top:0">{policies_h}</h3>
+  <ul>
+{links}
+  </ul>
+</div>
+
+<h2>{apple_h}</h2>
+<p>{apple_b}</p>
+
+<h2>{t["contact"]}</h2>
+<p class="small"><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>''')
+
+    # Support
+    faq = "\n".join(f"<h3>{q}</h3>\n<p>{a}</p>" for q, a in FAQ[lang])
+    studio = ("Tek kişilik bir stüdyo; yazdığın maili doğrudan ben okuyorum."
+              if lang == "tr" else
+              "A one-person studio — your email comes straight to me.")
+    hint = ("Hangi uygulama, hangi iPhone modeli ve iOS sürümü olduğunu yazarsan çok daha hızlı çözerim. Ekran görüntüsü de işe yarar."
+            if lang == "tr" else
+            "Tell me which app, which iPhone and which iOS version and I can fix it much faster. A screenshot helps too.")
+    faq_h = "Sık sorulanlar" if lang == "tr" else "Frequently asked"
+    page(lang, "support/", f"{t['support']} — Misket", studio, f'''<header class="hero">
+  <h1>{t["support"]}</h1>
+  <p class="tagline">{studio}</p>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:0">{t["contact"]}</h3>
+  <p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>
+  <p class="small">{hint}</p>
+</div>
+
+<h2>{faq_h}</h2>
+{faq}''')
+
+
+for lang in LANGS:
+    shutil.rmtree(os.path.join(OUT, lang), ignore_errors=True)
+    build_lang(lang)
+
+count = sum(len(files) for _, _, files in os.walk(OUT) if files)
+print(f"built {len(LANGS)} languages, {len(APPS)} apps")
