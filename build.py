@@ -264,7 +264,7 @@ def footer(lang):
     t = UI[lang]
     return f'''<footer>
   <p>{t["footer_1"]}</p>
-  <p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a> · <a href="/{lang}/privacy/">{t["privacy"]}</a> · <a href="/{lang}/support/">{t["support"]}</a> · © 2026 Furkan Torun</p>
+  <p><a href="mailto:hello@misket.app">hello@misket.app</a> · <a href="/{lang}/privacy/">{t["privacy"]}</a> · <a href="/{lang}/support/">{t["support"]}</a> · © 2026 Furkan Torun</p>
 </footer>'''
 
 
@@ -332,7 +332,7 @@ def build_lang(lang):
 </div>
 
 <h2>{t["contact"]}</h2>
-<p class="small">{t["contact_line"]} <a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>'''
+<p class="small">{t["contact_line"]} <a href="mailto:hello@misket.app">hello@misket.app</a></p>'''
     page(lang, "", t["home_title"], t["home_tagline"], home_body)
 
     # App pages + privacy
@@ -362,7 +362,7 @@ def build_lang(lang):
 </div>
 
 <h2>{t["support_h"]}</h2>
-<p class="small">{t["support_line"]} <a href="mailto:merhaba@misket.app?subject={name}">merhaba@misket.app</a></p>'''
+<p class="small">{t["support_line"]} <a href="mailto:hello@misket.app?subject={name}">hello@misket.app</a></p>'''
         page(lang, f"{slug}/", f"{name} — Misket", tagline, body)
 
         priv_body = f'''<header class="hero">
@@ -388,7 +388,7 @@ def build_lang(lang):
 <p>{t["changes_body"]}</p>
 
 <h2>{t["contact"]}</h2>
-<p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>'''
+<p><a href="mailto:hello@misket.app">hello@misket.app</a></p>'''
         page(lang, f"{slug}/privacy/", f"{name} — {t['privacy']} — Misket",
              t["privacy_short_version"].format(app=name), priv_body)
 
@@ -423,7 +423,7 @@ def build_lang(lang):
 <p>{apple_b}</p>
 
 <h2>{t["contact"]}</h2>
-<p class="small"><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>''')
+<p class="small"><a href="mailto:hello@misket.app">hello@misket.app</a></p>''')
 
     # Support
     faq = "\n".join(f"<h3>{q}</h3>\n<p>{a}</p>" for q, a in FAQ[lang])
@@ -441,7 +441,7 @@ def build_lang(lang):
 
 <div class="card">
   <h3 style="margin-top:0">{t["contact"]}</h3>
-  <p><a href="mailto:merhaba@misket.app">merhaba@misket.app</a></p>
+  <p><a href="mailto:hello@misket.app">hello@misket.app</a></p>
   <p class="small">{hint}</p>
 </div>
 
