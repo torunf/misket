@@ -24,6 +24,18 @@ STYLE_VERSION = hashlib.md5(
     open(os.path.join(ROOT, "style.css"), "rb").read()
 ).hexdigest()[:8]
 
+# Same trick for the icons: one version stamp over all of them, so a
+# re-exported icon can never be served from a stale edge cache.
+def _icon_version():
+    h = hashlib.md5()
+    d = os.path.join(ROOT, "icons")
+    for name in sorted(os.listdir(d)):
+        h.update(name.encode())
+        h.update(open(os.path.join(d, name), "rb").read())
+    return h.hexdigest()[:8]
+
+ICON_VERSION = _icon_version()
+
 # ---------------------------------------------------------------- content
 
 UI = {
@@ -317,13 +329,13 @@ def build_lang(lang):
         tagline = texts[lang][0]
         badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
         cards.append(f'''  <a class="app" href="/{lang}/{slug}/">
-    <img class="icon" src="/icons/{slug}.png" alt="{name}" width="60" height="60" loading="lazy">
+    <img class="icon" src="/icons/{slug}.png?v={ICON_VERSION}" alt="{name}" width="60" height="60" loading="lazy">
     <div class="name">{name} <span class="badge {badge_class}">{badge_text}</span></div>
     <div class="desc">{tagline}</div>
   </a>''')
 
     shelf = "".join(
-        f'<a href="/{lang}/{s}/"><img src="/icons/{s}.png" alt="{n}" width="52" height="52" loading="lazy"></a>'
+        f'<a href="/{lang}/{s}/"><img src="/icons/{s}.png?v={ICON_VERSION}" alt="{n}" width="52" height="52" loading="lazy"></a>'
         for s, n, *_ in APPS
     )
     home_body = f'''<header class="hero">
@@ -353,7 +365,7 @@ def build_lang(lang):
         badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
         feats = "\n".join(f"  <li>{f}</li>" for f in features)
         body = f'''<header class="app-head">
-  <img src="/icons/{slug}.png" alt="{name}" width="92" height="92">
+  <img src="/icons/{slug}.png?v={ICON_VERSION}" alt="{name}" width="92" height="92">
   <div>
     <h1>{name}</h1>
     <p class="tagline">{tagline}</p>
