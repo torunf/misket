@@ -10,12 +10,19 @@ visitor's language, so App Store links like /etut/privacy keep working):
 
 Run: python3 build.py
 """
+import hashlib
 import os, shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = ROOT
 
 LANGS = ("tr", "en")
+
+# Cloudflare caches static assets for hours, so the stylesheet link
+# carries a hash of its own contents: edit the CSS, get a new URL.
+STYLE_VERSION = hashlib.md5(
+    open(os.path.join(ROOT, "style.css"), "rb").read()
+).hexdigest()[:8]
 
 # ---------------------------------------------------------------- content
 
@@ -284,7 +291,7 @@ def page(lang, path_in_lang, title, description, body):
 <meta name="description" content="{description}">
 <link rel="canonical" href="https://misket.app{canonical}">
 {alt}<link rel="alternate" hreflang="x-default" href="https://misket.app/en/{path_in_lang}">
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/style.css?v={STYLE_VERSION}">
 </head>
 <body>
 <div class="wrap">
