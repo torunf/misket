@@ -310,16 +310,20 @@ def build_lang(lang):
         tagline = texts[lang][0]
         badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
         cards.append(f'''  <a class="app" href="/{lang}/{slug}/">
-    <div class="icon" style="background:linear-gradient(135deg,{g1},{g2})">{emoji}</div>
-    <div class="name">{name}</div>
+    <img class="icon" src="/icons/{slug}.png" alt="{name}" width="60" height="60" loading="lazy">
+    <div class="name">{name} <span class="badge {badge_class}">{badge_text}</span></div>
     <div class="desc">{tagline}</div>
-    <span class="badge {badge_class}">{badge_text}</span>
   </a>''')
 
+    shelf = "".join(
+        f'<a href="/{lang}/{s}/"><img src="/icons/{s}.png" alt="{n}" width="52" height="52" loading="lazy"></a>'
+        for s, n, *_ in APPS
+    )
     home_body = f'''<header class="hero">
   <h1>{t["home_h1"]}</h1>
   <p class="tagline">{t["home_tagline"]}</p>
-</header>
+  <div class="shelf">{shelf}</div>
+</header>''' + f'''
 
 <h2 id="apps">{t["apps"]}</h2>
 <div class="grid">
@@ -341,11 +345,13 @@ def build_lang(lang):
         tagline, longdesc, features, privacy = texts[lang]
         badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
         feats = "\n".join(f"  <li>{f}</li>" for f in features)
-        body = f'''<header class="hero">
-  <div class="icon" style="width:76px;height:76px;border-radius:18px;font-size:38px;display:grid;place-items:center;background:linear-gradient(135deg,{g1},{g2});margin-bottom:18px">{emoji}</div>
-  <h1>{name}</h1>
-  <p class="tagline">{tagline}</p>
-  <p><span class="badge {badge_class}">{badge_text}</span></p>
+        body = f'''<header class="app-head">
+  <img src="/icons/{slug}.png" alt="{name}" width="92" height="92">
+  <div>
+    <h1>{name}</h1>
+    <p class="tagline">{tagline}</p>
+    <div class="meta"><span class="badge {badge_class}">{badge_text}</span></div>
+  </div>
 </header>
 
 <p>{longdesc}</p>
