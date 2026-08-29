@@ -255,6 +255,26 @@ APPS = [
       "Progress tracking by topic; works offline once content is downloaded"],
      "Civics Test needs no account. It shows ads (Google AdMob) and syncs your study progress to our server under an anonymous device identifier; no name, email or personal details are collected."),
  }),
+ ("pastel", "Pastel", "🖍️", "#f9736a,#f2b134", "soon", {
+   "tr": ("Çocuklar için sonsuz boyama kitabı — sadece iPad.",
+     "Pastel, 2–8 yaş için bir boyama uygulaması. Sayfalar bitmez: her dokunuşta yeni bir bahçe, deniz, gökyüzü, orman ya da uzay resmi oluşur. Yaşa göre üç mod: dokun-doldur, çizgilerin dışına çıkmayan sihirli fırça ve serbest fırça. Reklam yok, abonelik yok, hesap yok.",
+     ["Sonsuz sayfa: her seferinde cihazda üretilen yeni bir resim",
+      "Yaş grubuna göre çizgi kalınlığı, nesne sayısı ve araçlar (Minik / Orta / Büyük)",
+      "Dokun-doldur, taşırmadan boyayan sihirli fırça, serbest fırça ve silgi",
+      "Apple Pencil ve parmakla; kalınlık basınca göre",
+      "Ayarlar ve paylaşım ebeveyn kapısının arkasında",
+      "Bitmiş resmi yazdır ya da paylaş (ebeveyn onayıyla)"],
+     "Pastel hiçbir veri toplamaz. Resimler yalnızca iPad'de saklanır; hesap, sunucu, analitik ya da reklam yoktur."),
+   "en": ("An endless coloring book for kids — iPad only.",
+     "Pastel is a coloring app for ages 2–8. The pages never run out: every tap makes a new garden, sea, sky, forest or space picture. Three modes by age: tap to fill, a magic brush that stays inside the lines, and a free brush. No ads, no subscriptions, no accounts.",
+     ["Endless pages: a new picture is generated on the device every time",
+      "Line thickness, scene complexity and tools follow the age group (Little / Middle / Big)",
+      "Tap to fill, a magic brush that cannot spill over the lines, free brush and eraser",
+      "Apple Pencil and fingers; pressure changes the brush size",
+      "Settings and sharing sit behind a parental gate",
+      "Print or share the finished picture (with a grown-up's OK)"],
+     "Pastel collects nothing. Pictures are stored only on the iPad; there is no account, server, analytics or advertising."),
+ }),
 ]
 
 # Apps that use a server or ads get their own privacy text instead of the
