@@ -275,6 +275,26 @@ APPS = [
       "Print or share the finished picture (with a grown-up's OK)"],
      "Pastel collects nothing. Pictures are stored only on the iPad; there is no account, server, analytics or advertising."),
  }),
+ ("findle", "Findle", "🔎", "#2a6bfa,#5b2bd6", "soon", {
+   "tr": ("Mac'te dosya adıyla anında arama — milyonlarca dosyada bile.",
+     "Findle, Mac'indeki her dosya ve klasörün adını hafif bir dizinde tutar. ⌥ Boşluk ile açılan Spotlight benzeri panelde yazdıkça sonuçlar milisaniyeler içinde gelir; gizli dosyalar, sistem klasörleri ve dış diskler dahil.",
+     ["⌥ Boşluk ile her uygulamanın üstünde açılan arama paneli",
+      "Yazdıkça sonuç: milyonlarca dosyada bile onlarca milisaniye",
+      "Joker karakter ve filtreler: serv*.json, ext:pdf, is:folder, size:>100mb, in:Downloads",
+      "Uygulamalar en üstte; Return ile aç, ⌘Return ile Finder'da göster, ⌘Y ile Quick Look",
+      "Diskler arka planda izlenir, dizin hep güncel kalır",
+      "Hangi disklerin dahil olacağını ve hangi klasörlerin atlanacağını sen seçersin"],
+     "Findle yalnızca dosya adlarını, boyutlarını ve tarihlerini okur; dosya içeriklerini hiç açmaz. Dizin yalnızca Mac'inde saklanır; ağ erişimi, hesap ve analitik yoktur."),
+   "en": ("Find any file on your Mac by name, instantly — even among millions.",
+     "Findle keeps a lightweight index of every file and folder name on your Mac. Press ⌥ Space, start typing, and results appear in milliseconds in a Spotlight-style panel — hidden files, system folders and external disks included.",
+     ["A search panel that opens over any app with ⌥ Space",
+      "Results as you type: tens of milliseconds even with millions of files",
+      "Wildcards and filters: serv*.json, ext:pdf, is:folder, size:>100mb, in:Downloads",
+      "Apps first; Return to open, ⌘Return to reveal in Finder, ⌘Y for Quick Look",
+      "Disks are watched in the background so the index stays current",
+      "You choose which disks to include and which folders to skip"],
+     "Findle reads only file names, sizes and dates; it never opens file contents. The index is stored only on your Mac; there is no network access, no account and no analytics."),
+ }),
 ]
 
 # Apps that use a server or ads get their own privacy text instead of the
