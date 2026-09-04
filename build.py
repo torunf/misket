@@ -112,7 +112,7 @@ UI = {
 }
 
 # The home page shows only these, in this order.
-HOME_SLUGS = ["findle", "fence", "opsix"]
+HOME_SLUGS = ["findle", "fence", "opsix", "sanita"]
 
 # slug, name, emoji, gradient, status, {lang: (tagline, longdesc, [features], privacy)}
 APPS = [
@@ -136,7 +136,7 @@ APPS = [
       "Daily report card: a shareable card and a PDF for parents or coaches"],
      "Etüt uses Apple's Screen Time (Family Controls) framework and <strong>cannot see</strong> which apps you block — that stays inside iOS. Your plans, study records and exam results are stored only on your device."),
  }),
- ("fence", "Fence", "🚧", "#2e7cd6,#14335f", "soon", {
+ ("fence", "Fence", "🚧", "#2e7cd6,#14335f", "live", {
    "tr": ("Dikkat dağıtan uygulamaları engelle. Bir kez öde.",
      "Fence, seçtiğin uygulamaları programa göre ya da odak seansları boyunca engeller — tek seferlik küçük bir ücretle, sonsuza dek.",
      ["Çitler: uygulama ve kategori seçimi, program ya da odak seansı",
