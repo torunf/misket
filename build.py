@@ -41,9 +41,10 @@ ICON_VERSION = _icon_version()
 UI = {
     "tr": {
         "apps": "Uygulamalar", "support": "Destek", "privacy": "Gizlilik",
-        "home_title": "Misket — Küçük ama iyi yapılmış uygulamalar",
-        "home_h1": "Küçük ama iyi yapılmış uygulamalar.",
-        "home_tagline": "Misket; tek bir işi düzgün yapan, cihazında çalışan, seni takip etmeyen iPhone uygulamalarının çatısıdır. Hesap yok, sunucu yok, abonelik dayatması yok.",
+        "home_title": "Misket",
+        "home_h1": "Misket",
+        "home_tagline": "",
+        "home_desc": "Misket uygulamaları: Findle, Fence ve OpSix.",
         "principles": "Ortak ilkeler",
         "p1": "<strong>Cihazında kalır.</strong> Verilerin iPhone'undan çıkmaz; hesap ya da bulut gerekmez.",
         "p2": "<strong>Takip yok.</strong> Analitik, reklam kimliği ve üçüncü taraf izleyici kullanmıyoruz.",
@@ -56,7 +57,7 @@ UI = {
         "privacy_link": "gizlilik politikası →",
         "support_h": "Destek",
         "support_line": "Sorunun mu var? Şu adrese yaz — genelde aynı gün dönüyorum:",
-        "footer_1": "Misket, Furkan Torun tarafından yapılan uygulamaların çatısıdır. Hesap yok, takip yok; her uygulamanın ne sakladığı kendi gizlilik sayfasında yazar.",
+        "footer_1": "Hesap yok, takip yok; her uygulamanın ne sakladığı kendi gizlilik sayfasında yazar.",
         "updated": "Son güncelleme: 16 Ağustos 2026",
         "privacy_short_version": "Kısa versiyon: {app} hiçbir veri toplamaz.",
         "where_data": "Verileriniz nerede durur?",
@@ -75,9 +76,10 @@ UI = {
     },
     "en": {
         "apps": "Apps", "support": "Support", "privacy": "Privacy",
-        "home_title": "Misket — Small apps, made well",
-        "home_h1": "Small apps, made well.",
-        "home_tagline": "Misket is the home of iPhone apps that do one thing properly, run on your device and never track you. No accounts, no servers, no subscription traps.",
+        "home_title": "Misket",
+        "home_h1": "Misket",
+        "home_tagline": "",
+        "home_desc": "Misket apps: Findle, Fence and OpSix.",
         "principles": "What they share",
         "p1": "<strong>Stays on your device.</strong> Your data never leaves your iPhone — no account, no cloud.",
         "p2": "<strong>No tracking.</strong> No analytics, no advertising identifiers, no third-party trackers.",
@@ -90,7 +92,7 @@ UI = {
         "privacy_link": "privacy policy →",
         "support_h": "Support",
         "support_line": "Something wrong? Write to — usually answered the same day:",
-        "footer_1": "Misket is the home of apps made by Furkan Torun. No accounts, no tracking; what each app stores is spelled out on its own privacy page.",
+        "footer_1": "No accounts, no tracking; what each app stores is spelled out on its own privacy page.",
         "updated": "Last updated: 16 August 2026",
         "privacy_short_version": "The short version: {app} collects no data.",
         "where_data": "Where your data lives",
@@ -108,6 +110,9 @@ UI = {
         "lang_other": "Türkçe",
     },
 }
+
+# The home page shows only these, in this order.
+HOME_SLUGS = ["findle", "fence", "opsix"]
 
 # slug, name, emoji, gradient, status, {lang: (tagline, longdesc, [features], privacy)}
 APPS = [
@@ -406,7 +411,7 @@ def footer(lang):
     t = UI[lang]
     return f'''<footer>
   <p>{t["footer_1"]}</p>
-  <p><a href="mailto:hello@misket.app">hello@misket.app</a> · <a href="/{lang}/privacy/">{t["privacy"]}</a> · <a href="/{lang}/support/">{t["support"]}</a> · © 2026 Furkan Torun</p>
+  <p><a href="mailto:hello@misket.app">hello@misket.app</a> · <a href="/{lang}/privacy/">{t["privacy"]}</a> · <a href="/{lang}/support/">{t["support"]}</a> · © 2026 Misket</p>
 </footer>'''
 
 
@@ -445,9 +450,11 @@ def page(lang, path_in_lang, title, description, body):
 def build_lang(lang):
     t = UI[lang]
 
-    # Home
+    # Home: only the apps we want front and center right now.
+    # Every other app keeps its inner page and stays reachable by direct link.
+    home_apps = [a for h in HOME_SLUGS for a in APPS if a[0] == h]
     cards = []
-    for slug, name, emoji, grad, status, texts in APPS:
+    for slug, name, emoji, grad, status, texts in home_apps:
         g1, g2 = grad.split(",")
         tagline = texts[lang][0]
         badge_class, badge_text = ("live", t["badge_live"]) if status == "live" else ("soon", t["badge_soon"])
@@ -459,11 +466,11 @@ def build_lang(lang):
 
     shelf = "".join(
         f'<a href="/{lang}/{s}/"><img src="/icons/{s}.png?v={ICON_VERSION}" alt="{n}" width="52" height="52" loading="lazy"></a>'
-        for s, n, *_ in APPS
+        for s, n, *_ in home_apps
     )
+    hero_tagline = f'\n  <p class="tagline">{t["home_tagline"]}</p>' if t["home_tagline"] else ""
     home_body = f'''<header class="hero">
-  <h1>{t["home_h1"]}</h1>
-  <p class="tagline">{t["home_tagline"]}</p>
+  <h1>{t["home_h1"]}</h1>{hero_tagline}
   <div class="shelf">{shelf}</div>
 </header>''' + f'''
 
@@ -479,7 +486,7 @@ def build_lang(lang):
 
 <h2>{t["contact"]}</h2>
 <p class="small">{t["contact_line"]} <a href="mailto:hello@misket.app">hello@misket.app</a></p>'''
-    page(lang, "", t["home_title"], t["home_tagline"], home_body)
+    page(lang, "", t["home_title"], t.get("home_desc") or t["home_tagline"], home_body)
 
     # App pages + privacy
     for slug, name, emoji, grad, status, texts in APPS:
